@@ -1,5 +1,6 @@
-streamlit
-pandas
-Pillow
-pytesseract
-PyMuPDF
+streamlit>=1.40,<2
+pandas>=2.0,<3
+Pillow>=10.0
+pytesseract>=0.3.10
+PyMuPDF>=1.23
+supabase>=2.10,<3

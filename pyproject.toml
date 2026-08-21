@@ -4,13 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "custom-receipt-processor"
-version = "1.0.0"
+version = "2.0.0"
 description = "OCR receipt images and PDFs into validated JSON or CSV"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
   "Pillow>=10.0.0",
   "pytesseract>=0.3.10",
+  "supabase>=2.10,<3",
 ]
 
 [project.optional-dependencies]

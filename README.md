@@ -1,6 +1,56 @@
-# Custom Receipt Processor — Streamlit Edition
+# Receipt Tracker 2.0 — Streamlit + Supabase
 
-A Streamlit application and Python package derived from the supplied OCR Document Processor `SKILL.md`. It accepts receipt images and scanned PDFs, performs optional preprocessing and Tesseract OCR, and produces structured JSON or CSV.
+A secure multi-user business-expense tracker. Streamlit provides the interface and OCR workflow; Supabase permanently stores expense records, user access, audit history, and original receipt files.
+
+## Version 2 features
+
+- Email/password login restricted to administrator-approved emails
+- Permanent Supabase database and private receipt-file storage
+- Editable businesses and expense categories
+- Receipt OCR for images and scanned PDFs
+- Merchant, date, subtotal, tax, tip, discount, total, currency, and line items
+- Business purpose, client, project, payment method, and notes
+- Duplicate detection using receipt hashes and merchant/date/total matching
+- Search, filters, receipt detail and download, editing, and batch deletion
+- Monthly and annual dashboard totals
+- Monthly, quarterly, and yearly reports by category, business, project, or client
+- CSV exports and complete audit history
+- Admin team allow-list with access disable/restore controls
+
+## 1. Create Supabase
+
+1. Create a project at [supabase.com](https://supabase.com/).
+2. Open **SQL Editor**, create a query, paste all of `supabase_setup.sql`, and click **Run**.
+3. In **Authentication → URL Configuration**, set **Site URL** to your Streamlit app URL.
+4. In **Project Settings → API Keys**, copy the project URL, anon key, and service-role key.
+
+The service-role key is highly sensitive. Never put it in GitHub or share it with app users.
+
+## 2. Configure Streamlit Secrets
+
+Open **Streamlit → Manage app → Settings → Secrets** and add:
+
+```toml
+[supabase]
+url = "https://YOUR-PROJECT.supabase.co"
+anon_key = "YOUR-ANON-KEY"
+service_role_key = "YOUR-SERVICE-ROLE-KEY"
+
+[app]
+admin_emails = ["your-email@example.com"]
+```
+
+Replace the admin email with the email you will use to sign in. Save the secrets and reboot the app.
+
+## 3. Create the first administrator account
+
+1. Open the Streamlit app.
+2. Choose **Create invited account**.
+3. Enter the exact email listed in `admin_emails` and create a password.
+4. Confirm the email if Supabase sends a confirmation message.
+5. Return to the app and sign in.
+
+Once signed in, create at least one business, then upload receipts. Use the **Team** page to authorize additional emails. Invited people open the same app, select **Create invited account**, and use the exact email you authorized.
 
 ## Deploy on Streamlit Community Cloud
 
@@ -12,7 +62,7 @@ A Streamlit application and Python package derived from the supplied OCR Documen
 6. In **Advanced settings**, select Python 3.12.
 7. Click **Deploy**.
 
-Community Cloud reads `requirements.txt` for Python packages and `packages.txt` for the Tesseract system packages. No API key is required.
+Community Cloud reads `requirements.txt` for Python packages and `packages.txt` for the Tesseract system packages. Supabase credentials must be added through Streamlit Secrets.
 
 Repository layout:
 

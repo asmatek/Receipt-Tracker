@@ -1,4 +1,4 @@
-# Upgrade the live Streamlit app to Receipt Tracker 2.0
+# Upgrade the live Streamlit app to Receipt Tracker 4.0
 
 ## A. Update GitHub
 
@@ -7,7 +7,7 @@
 3. In the existing GitHub `Receipt-Tracker` repository, click **Add file → Upload files**.
 4. Drag everything inside the extracted folder into the upload page.
 5. Confirm that GitHub reports replacements for existing files and additions for new files.
-6. Commit directly to `main` with the message `Upgrade to Supabase receipt tracker`.
+6. Commit directly to `main` with the message `Upgrade accounting and reimbursement workflow`.
 
 Required new or changed files include:
 
@@ -23,15 +23,15 @@ src/receipt_processor/core.py
 
 Do not upload a real `.streamlit/secrets.toml` file.
 
-## B. Create the Supabase database
+## B. Upgrade the Supabase database
 
 1. Go to <https://supabase.com/> and create an account or sign in.
-2. Click **New project**.
-3. Choose an organization, enter a project name such as `receipt-tracker`, generate a strong database password, and choose the closest region.
-4. Wait for the project to finish provisioning.
-5. Open **SQL Editor → New query**.
-6. Open `supabase_setup.sql` from the downloaded package, copy all of it, paste it into the SQL editor, and click **Run**.
-7. Confirm that the query completes without an error.
+2. Open your existing Receipt Tracker project.
+3. Open **SQL Editor → New query**.
+4. Open `supabase_setup.sql` from the downloaded package, copy all of it, paste it into the SQL editor, and click **Run**.
+5. Confirm that the query completes without an error. It preserves existing expenses and adds review, duplicate, rules, reimbursement, backup, and recycle-bin support.
+
+Run the SQL migration **before** uploading the new Python files. The new app expects the added columns and tables.
 
 ## C. Copy Supabase credentials
 

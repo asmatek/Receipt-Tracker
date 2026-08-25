@@ -70,6 +70,7 @@ class ReceiptProcessor:
         "subtotal": ("subtotal", "sub total", "net amount"),
         "tax": ("tax", "vat", "gst", "hst", "sales tax"),
         "tip": ("tip", "gratuity"),
+        "fees": ("fee", "fees", "service charge", "delivery charge"),
         "discount": ("discount", "coupon", "savings"),
         "total": ("grand total", "amount due", "balance due", "total"),
     }
@@ -133,6 +134,7 @@ class ReceiptProcessor:
         total = summary["total"] or cls._last_amount(lines)
         vendor = cls._vendor(lines)
         date = cls._date(cleaned)
+        transaction_time = cls._time(cleaned)
         inferred_currency = currency.upper() if currency else cls._currency(cleaned)
         items = cls._items(lines)
 
@@ -142,20 +144,30 @@ class ReceiptProcessor:
         if total is None:
             warnings.append("total_not_found")
         if summary["subtotal"] is not None and summary["tax"] is not None and total is not None:
-            expected = summary["subtotal"] + summary["tax"] + (summary["tip"] or Decimal("0")) - (summary["discount"] or Decimal("0"))
+            expected = (
+                summary["subtotal"] + summary["tax"] + (summary["tip"] or Decimal("0"))
+                + (summary["fees"] or Decimal("0")) - (summary["discount"] or Decimal("0"))
+            )
             if abs(expected - total) > Decimal("0.02"):
                 warnings.append("totals_do_not_reconcile")
 
         result = {
             "vendor": vendor,
             "date": date,
+            "time": transaction_time,
             "currency": inferred_currency,
             "items": [cls._serialize_item(item) for item in items],
             "subtotal": cls._decimal_string(summary["subtotal"]),
             "tax": cls._decimal_string(summary["tax"]),
             "tip": cls._decimal_string(summary["tip"]),
+            "fees": cls._decimal_string(summary["fees"]),
             "discount": cls._decimal_string(summary["discount"]),
             "total": cls._decimal_string(total),
+            "payment_method": cls._payment_method(cleaned),
+            "card_last4": cls._card_last4(cleaned),
+            "receipt_number": cls._receipt_number(cleaned),
+            "location": "",
+            "document_kind": cls._document_kind(cleaned),
             "warnings": warnings,
             "raw_text": cleaned,
         }
@@ -349,6 +361,40 @@ class ReceiptProcessor:
                         continue
                 return raw
         return None
+
+    @staticmethod
+    def _time(text: str) -> Optional[str]:
+        match = re.search(r"\b(?:[01]?\d|2[0-3]):[0-5]\d(?:\s*[AP]M)?\b", text, re.IGNORECASE)
+        return match.group(0).upper().replace(" ", "") if match else None
+
+    @staticmethod
+    def _card_last4(text: str) -> Optional[str]:
+        match = re.search(r"(?i)\b(?:visa|mastercard|master card|amex|discover|card)?\s*(?:x{2,}|\*{2,}|ending\s+in)\s*[- ]?(\d{4})\b", text)
+        return match.group(1) if match else None
+
+    @staticmethod
+    def _payment_method(text: str) -> Optional[str]:
+        for label in ("Visa", "Mastercard", "Amex", "Discover", "Apple Pay", "Google Pay", "Cash"):
+            if re.search(rf"(?i)\b{re.escape(label)}\b", text):
+                return label
+        return None
+
+    @staticmethod
+    def _receipt_number(text: str) -> Optional[str]:
+        match = re.search(r"(?im)\b(?:receipt|invoice|order|transaction)\s*(?:no\.?|number|#|id)?\s*[:#-]?\s*([A-Z0-9][A-Z0-9-]{3,30})\b", text)
+        return match.group(1) if match else None
+
+    @staticmethod
+    def _document_kind(text: str) -> str:
+        if re.search(r"(?i)\b(refund|refunded)\b", text):
+            return "refund"
+        if re.search(r"(?i)\b(credit memo|credit note)\b", text):
+            return "credit"
+        if re.search(r"(?i)\bstatement\b", text):
+            return "statement"
+        if re.search(r"(?i)\binvoice\b", text):
+            return "invoice"
+        return "receipt"
 
     @classmethod
     def _find_labeled_amount(cls, lines: Sequence[str], labels: Iterable[str]) -> Optional[Decimal]:

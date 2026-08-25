@@ -1,9 +1,23 @@
-# Receipt Tracker 2.0 — Streamlit + Supabase
+# Receipt Tracker 4.0 — Streamlit + Supabase
 
 A secure multi-user business-expense tracker. Streamlit provides the interface and OCR workflow; Supabase permanently stores expense records, user access, audit history, and original receipt files.
 
-## Version 2 features
+## Version 4 features
 
+- Multi-file receipt inbox with progress, per-receipt review, and save status
+- Automatic merchant extraction and reusable merchant records
+- Editable merchant names and a safe merge tool for duplicates
+- Duplicate checks using file hashes, exact fields, and fuzzy OCR-name matching
+- Polished responsive cards, status pills, and simplified navigation
+- Receipt, invoice, credit, refund, statement, email, and non-receipt classification
+- EML and text-document ingestion in addition to images and PDFs
+- Explainable duplicate scoring using file hashes, OCR-text fingerprints, receipt numbers, visual hashes, and transaction fields
+- Approval, needs-review, and rejection workflow with reimbursement-safe totals
+- Draft, submitted, paid, and cancelled reimbursement batches
+- PDF, CSV, and ZIP reimbursement packages with original receipt attachments
+- Refund-safe negative accounting, tax totals, richer metadata, line-item editing, tags, attendees, mileage, departments, and personal/reimbursable controls
+- Merchant rules for automatic category, project, and tag assignment
+- Full ZIP backup/restore and a recoverable recycle bin
 - Email/password login restricted to administrator-approved emails
 - Permanent Supabase database and private receipt-file storage
 - Editable businesses and expense categories
@@ -20,7 +34,7 @@ A secure multi-user business-expense tracker. Streamlit provides the interface a
 ## 1. Create Supabase
 
 1. Create a project at [supabase.com](https://supabase.com/).
-2. Open **SQL Editor**, create a query, paste all of `supabase_setup.sql`, and click **Run**.
+2. Open **SQL Editor**, create a query, paste all of `supabase_setup.sql`, and click **Run**. Existing installations can safely run the file again to add the merchant upgrade.
 3. In **Authentication → URL Configuration**, set **Site URL** to your Streamlit app URL.
 4. In **Project Settings → API Keys**, copy the project URL, anon key, and service-role key.
 
@@ -51,6 +65,14 @@ Replace the admin email with the email you will use to sign in. Save the secrets
 5. Return to the app and sign in.
 
 Once signed in, create at least one business, then upload receipts. Use the **Team** page to authorize additional emails. Invited people open the same app, select **Create invited account**, and use the exact email you authorized.
+
+## Accounting workflow
+
+1. Upload several documents in **Receipt inbox**.
+2. Confirm critical OCR fields and save each record.
+3. Resolve warnings in **Duplicate review** and approve eligible expenses in **Expenses**.
+4. Create a batch in **Reimbursements**. Only approved, business, reimbursable, non-duplicate expenses are eligible.
+5. Submit or mark the batch paid, then download its PDF, CSV, or complete ZIP package.
 
 ## Deploy on Streamlit Community Cloud
 

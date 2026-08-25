@@ -20,11 +20,15 @@ import streamlit as st
 PROJECT_ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(PROJECT_ROOT / "src"))
 
-from receipt_processor import (  # noqa: E402
-    ReceiptProcessingError, ReceiptProcessor, TrackerStore, image_perceptual_hash,
-    signed_total, text_fingerprint,
-)
-from receipt_processor.tracker import duplicate_key, money  # noqa: E402
+try:  # Import concrete modules so startup errors identify the exact dependency.
+    from receipt_processor.core import ReceiptProcessingError, ReceiptProcessor  # noqa: E402
+    from receipt_processor.tracker import TrackerStore, duplicate_key, money  # noqa: E402
+    from receipt_processor.workflow import image_perceptual_hash, signed_total, text_fingerprint  # noqa: E402
+except ImportError as exc:
+    st.error("Receipt Tracker could not load a required Python component.")
+    st.code(f"{type(exc).__name__}: {exc}")
+    st.info("Confirm that requirements.txt and the complete src/receipt_processor folder were uploaded, then reboot the app.")
+    st.stop()
 
 
 st.set_page_config(page_title="Receipt Tracker", page_icon="🧾", layout="wide")
